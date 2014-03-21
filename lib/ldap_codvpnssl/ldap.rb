@@ -6,8 +6,6 @@ module LdapCodVPNSSL
 
   class LDAP
 
-    attr_reader :connection
-
     def initialize(options)
 
       uri = URI.parse(options[:uri])
@@ -24,6 +22,16 @@ module LdapCodVPNSSL
         })
 
       self
+    end
+
+    def search(query, attributes = [])
+      
+      @connection.search(:filter =>Net::LDAP::Filter.construct(query), :attributes =>attributes, :return_result =>true)
+    end
+
+    def replace(dn, attribute, value)
+
+      @connection.replace_attribute(dn, attribute, value)
     end
   end
 end
