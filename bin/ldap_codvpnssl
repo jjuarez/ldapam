@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+$:<< File.expand_path("../../lib", __FILE__)
+require 'ldap_codvpnssl'
+
+LdapCodVPNSSL::CLI::start
