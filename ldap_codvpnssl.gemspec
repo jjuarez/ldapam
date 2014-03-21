@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["javier.juarez@gmail.com"]
   spec.summary       = %q{Utilidad para modificacion de campos LDAP}
   spec.description   = %q{Utilidad para la gestion de los códigos de ubicación de usuarios en el CSIC}
-  spec.homepage      = "www.csic.es"
+  spec.homepage      = "http://www.csic.es"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
