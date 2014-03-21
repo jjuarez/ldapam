@@ -8,23 +8,23 @@ module LdapCodVPNSSL
 
     def initialize(options)
 
-      uri = URI.parse(options[:uri])
+      uri = URI.parse(options.uri)
 
     	@connection = Net::LDAP.new(
     	  :host       =>uri.host,
         :port       =>uri.port,
-        :base       =>options[:base],
+        :base       =>options.base,
         :encryption =>(uri.scheme == "ldaps" ? :simple_tls : nil),
         :auth       =>{
           :method   =>:simple,
-          :username =>options[:username],
-          :password =>options[:password]
+          :username =>options.username,
+          :password =>options.password
         })
 
       self
     end
 
-    def search(query, attributes = [])
+    def search(query, attributes = [ ])
       
       @connection.search(:filter =>Net::LDAP::Filter.construct(query), :attributes =>attributes, :return_result =>true)
     end
