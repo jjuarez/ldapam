@@ -8,30 +8,32 @@ module LDAPAM
 
     def initialize(options)
 
-      uri = URI.parse(options.uri)
+      uri = URI.parse(options['uri'])
 
     	@connection = Net::LDAP.new(
     	  :host       =>uri.host,
         :port       =>uri.port,
-        :base       =>options.base,
-        :encryption =>uri.scheme == "ldaps" ? :simple_tls : nil,
+        :base       =>options['base'],
+        :encryption =>uri.scheme == 'ldaps' ? :simple_tls : nil,
         :auth       =>{
           :method   =>:simple,
-          :username =>options.username,
-          :password =>options.password
+          :username =>options['username'],
+          :password =>options['password']
         })
 
       self
     end
 
-    def search(query, attributes = [ ])
-      
-      @connection.search(:filter =>Net::LDAP::Filter.construct(query), :attributes =>attributes, :return_result =>true)
+    def update(dn, attribute, value)
+      @connection.replace_attribute(dn, attribute, value)
     end
 
-    def replace(dn, attribute, value)
+    def find_by_uid(uid, attributes =[ ]) 
 
-      @connection.replace_attribute(dn, attribute, value)
+      @connection.search(
+        :filter        =>Net::LDAP::Filter.eq("uid", uid), 
+        :attributes    =>attributes, 
+        :return_result =>true)
     end
   end
 end

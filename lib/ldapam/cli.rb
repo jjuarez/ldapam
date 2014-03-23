@@ -1,7 +1,7 @@
 # encoding: utf-8
 require "thor"
 require "ldapam/config"
-require "ldapam/ldap"
+require "ldapam/client"
 
 
 module LDAPAM
@@ -10,44 +10,20 @@ module LDAPAM
 
     class_option :config, :aliases =>"-c", :type =>:string
 
-    desc "get UID", "Muestra el CodVPNSSL de un uid"
-    method_option :attribute, :aliases =>"-a", :default =>:codvpnssl, :type =>:string, :desc =>"Atributo a consultar"
-    method_option :id,        :aliases =>"-i", :default =>:uid,       :type =>:string, :desc =>"Atributo de búsqueda"
-    def get(uid)
+    desc "get uid attribute", "Show the attribute for the uid"
+    def get(uid, attribute)
 
-      query     = "#{options[:id]}=#{uid}"
-      resultset = LDAP.new(Config.new(options[:config])).search(query, [:dn, options[:attribute]])
-
-      case resultset.size
-        when 0 then
-          STDERR.puts("No hay resultados para #{query}")
-
-      else
-        resultset.each do |e|
-
-          puts "dn: #{e.dn}"
-          puts "#{options[:attribute]}: #{(e[options[:attribute]].size > 1) ? e[options[:attribute]] : e[options[:attribute]][0]}"
-        end
-      end
+      Client.new(Config.new(options[:config])).find_by_uid(uid, [attribute]).each { |e| puts "#{attribute}: #{e[attribute]}" }
     end
 
 
-    desc "set UID VALUE", "Muestra el atributo de un UID"
-    method_option :attribute, :aliases =>"-a", :default =>:codvpnssl, :type =>:string, :desc =>"Atributo a cambiar"
-    method_option :id,        :aliases =>"-i", :default =>:uid,       :type =>:string, :desc =>"Atributo de búsqueda"
-    def set(uid, value)
+    desc "set uid attribute value", "Replace the attribute for the uid"
+    def set(uid, attribute, value)
 
-      query     = "#{options[:id]}=#{uid}"
-      ldap      = LDAP.new(Config.new(options[:config]))
-      resultset = ldap.search(query, [:dn])
+      ldap      = Client.new(Config.new(options[:config]))
+      resultset = ldap.find_by_uid(uid, [:dn])
 
-      case resultset.size
-        when 0 then
-          STDERR.puts("No hay resultados para #{query}")
-
-        else
-          resultset.each { |e| ldap.replace(e.dn, options[:attribute], value) }
-      end
+      resultset.each { |e| ldap.update(e.dn, attribute, value) }
     end
   end
 end
