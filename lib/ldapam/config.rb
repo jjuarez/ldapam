@@ -2,8 +2,7 @@ require 'yaml'
 require 'json'
 
 
-module LdapCodVPNSSL
-
+module LDAPAM
 
   class Config
 
@@ -16,7 +15,8 @@ module LdapCodVPNSSL
         when /\.json/i       then @config = JSON.parse(File.read(source))
         when Hash            then @config = source
 
-      else 
+      else
+        
         yield self if block_given?
       end
 
@@ -25,13 +25,11 @@ module LdapCodVPNSSL
 
 
     def [](key)
-
       @config[key]
     end
 
 
     def []=(key, value)
-
       @config[key] = value
     end
 

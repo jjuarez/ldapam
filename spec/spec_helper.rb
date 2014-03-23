@@ -1,2 +1,3 @@
 $:<< File.expand_path('../../lib', __FILE__)
-require 'ldap_codvpnssl'
+
+require 'ldapam'

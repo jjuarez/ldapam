@@ -2,9 +2,9 @@ require 'uri'
 require 'net/ldap'
 
 
-module LdapCodVPNSSL
+module LDAPAM
 
-  class LDAP
+  class Client
 
     def initialize(options)
 
@@ -14,7 +14,7 @@ module LdapCodVPNSSL
     	  :host       =>uri.host,
         :port       =>uri.port,
         :base       =>options.base,
-        :encryption =>(uri.scheme == "ldaps" ? :simple_tls : nil),
+        :encryption =>uri.scheme == "ldaps" ? :simple_tls : nil,
         :auth       =>{
           :method   =>:simple,
           :username =>options.username,

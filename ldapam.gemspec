@@ -1,12 +1,12 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $:<< lib unless $LOAD_PATH.include?(lib)
-require 'ldap_codvpnssl/version'
+require 'ldapam/version'
 
 Gem::Specification.new do |spec|
 
-  spec.name          = "ldap_codvpnssl"
-  spec.version       = LdapCodVPNSSL::VERSION
+  spec.name          = "ldapam"
+  spec.version       = LDAPAM::VERSION
   spec.authors       = ["Javier Juarez"]
   spec.email         = ["javier.juarez@gmail.com"]
   spec.summary       = %q{Utilidad para modificacion de campos LDAP}
