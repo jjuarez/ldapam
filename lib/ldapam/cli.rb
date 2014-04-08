@@ -13,7 +13,10 @@ module LDAPAM
     desc "get uid attribute", "Show the attribute for the uid"
     def get(uid, attribute)
 
-      Client.new(Config.new(options[:config])).find_by_uid(uid, [attribute]).each { |e| puts "#{attribute}: #{e[attribute]}" }
+      ldap      = Client.new(Config.new(options[:config]))
+      resultset = ldap.find_by_uid(uid, [attribute])
+
+      resultset.each { |e| puts "#{attribute}: #{e[attribute]}" }
     end
 
 
@@ -24,6 +27,15 @@ module LDAPAM
       resultset = ldap.find_by_uid(uid, [:dn])
 
       resultset.each { |e| ldap.update(e.dn, attribute, value) }
+    end
+
+    desc "showuids attribute value", "Replace the attribute for the uid"
+    def showuids(attribute, value)
+
+      ldap      = Client.new(Config.new(options[:config]))
+      resultset = ldap.find_by(:codVPNSSL, value, [:uid])
+
+      resultset.each { |e| puts "#{e['uid'][0]}" }
     end
   end
 end

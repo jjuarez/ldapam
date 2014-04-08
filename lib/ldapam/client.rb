@@ -24,15 +24,31 @@ module LDAPAM
       self
     end
 
+
     def update(dn, attribute, value)
+
       @connection.replace_attribute(dn, attribute, value)
     end
 
-    def find_by_uid(uid, attributes =[ ]) 
+    
+    def find_by_uid(uid, attributes=[ ]) 
+
+      filter = Net::LDAP::Filter.eq("uid", uid)
 
       @connection.search(
-        :filter        =>Net::LDAP::Filter.eq("uid", uid), 
+        :filter        =>filter, 
         :attributes    =>attributes, 
+        :return_result =>true)
+    end
+
+    
+    def find_by(attribute, value, attributes=[:dn])
+      
+      filter = Net::LDAP::Filter.eq(attribute, value)
+
+      @connection.search(
+        :filter        =>filter, 
+        :attributes    =>attributes,
         :return_result =>true)
     end
   end
