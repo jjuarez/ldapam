@@ -4,6 +4,9 @@ require 'json'
 
 module LDAPAM
 
+  class ConfigError < StandardError
+  end
+
   class Config
 
     def initialize(source=nil, options={ }, &block)
@@ -11,8 +14,12 @@ module LDAPAM
       @config = Hash.new
 
       case source
-        when /\.(yml|yaml)/i then @config = YAML.load_file(source)        
-        when Hash            then @config = source
+        when /\.(yml|yaml)/i then
+          raise ConfigError.new("File: #{source} do not exist") unless File.exist?(source)
+          @config = YAML.load_file(source)    
+        
+        when Hash then 
+          @config = source
 
       else
         
@@ -20,6 +27,12 @@ module LDAPAM
       end
 
       self
+    end
+
+
+    def keys()
+
+      @config.keys
     end
 
 
