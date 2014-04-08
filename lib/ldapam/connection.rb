@@ -4,23 +4,40 @@ require 'net/ldap'
 
 module LDAPAM
 
-  class Client
+  class ConnectionError < StandardError
+  end
+
+  class Connection
+
+    CONFIG_KEYS = [:uri, :base, :username, :password]
+
+
+    def self.test_config(options)
+
+      CONFIG_KEYS.each do |key|
+
+        raise ConnectionError.new("Bad configuration, the key: #{key} do not exist") unless options.keys.include?(key)
+      end
+    end
+
 
     def initialize(options)
 
-      uri = URI.parse(options['uri'])
+      Connection.test_config(options)
+
+      uri = URI.parse(options[:uri])
 
     	@connection = Net::LDAP.new(
     	  :host       =>uri.host,
         :port       =>uri.port,
-        :base       =>options['base'],
+        :base       =>options[:base],
         :encryption =>uri.scheme == 'ldaps' ? :simple_tls : nil,
         :auth       =>{
           :method   =>:simple,
-          :username =>options['username'],
-          :password =>options['password']
+          :username =>options[:username],
+          :password =>options[:password]
         })
-
+ 
       self
     end
 
@@ -30,18 +47,7 @@ module LDAPAM
       @connection.replace_attribute(dn, attribute, value)
     end
 
-    
-    def find_by_uid(uid, attributes=[ ]) 
-
-      filter = Net::LDAP::Filter.eq("uid", uid)
-
-      @connection.search(
-        :filter        =>filter, 
-        :attributes    =>attributes, 
-        :return_result =>true)
-    end
-
-    
+      
     def find_by(attribute, value, attributes=[:dn])
       
       filter = Net::LDAP::Filter.eq(attribute, value)
