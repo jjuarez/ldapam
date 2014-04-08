@@ -1,6 +1,6 @@
 # LDAPAM
 
-TODO: Write a gem description
+    LDAP Attribute Manipulator
 
 ## Installation
 
@@ -18,7 +18,7 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+    $ ldapam help
 
 ## Contributing
 
