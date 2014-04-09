@@ -3,4 +3,4 @@
 $:<< File.expand_path("../../lib", __FILE__)
 require 'ldapam'
 
-LDAPAM::CLI::start( )
+LDAPAM::CLI::start
