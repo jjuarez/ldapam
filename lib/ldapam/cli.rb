@@ -9,7 +9,7 @@ module LDAPAM
   class CLI < Thor
 
 
-    desc "showuids attribute value", "Replace the attribute for the uid"
+    desc "find attribute value", "Replace the attribute for the uid"
     method_option :config, :type =>:string, :required =>true
     def find(attribute, value, *attributes)
 
