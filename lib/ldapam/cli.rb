@@ -8,67 +8,34 @@ module LDAPAM
 
   class CLI < Thor
 
-    def self.die(exception, code=0)
-    
-      STDERR.puts "ERROR: #{exception.class}: '#{exception.message}'"
-      ::Kernel.exit(code)
-    end
-
-
-    def self.pp_entry(entry, attributes)
-
-      attributes.each do |attribute|
-
-        if entry[attribute].length > 1
-
-          puts "#{attribute}: #{entry[attribute].join(",")}"
-        else
-
-          puts "#{attribute}: #{entry[attribute][0]}"
-        end
-      end
-    end
-
-
-    desc "get uid attribute", "Show the attribute for the uid"
-    method_option :config, :type =>:string, :required =>true
-    def get(uid, attribute)
-
-      config    = Config.new(options[:config])
-      ldap      = Connection.new(config)
-      resultset = ldap.find_by(:uid, uid, [attribute])
-
-      resultset.each { |entry| CLI.pp_entry(entry, attribute) }
-    rescue Exception =>exc
-      CLI.die(exc, 1) 
-    end
-
-
-    desc "set uid attribute value", "Replace the attribute for the uid"
-    method_option :config, :type =>:string, :required =>true
-    def set(uid, attribute, value)
-
-      config    = Config.new(options[:config])
-      ldap      = Connection.new(config)
-      resultset = ldap.find_by(:uid, uid, [:dn])
-
-      resultset.each { |entry| ldap.update(entry.dn, attribute, value) }
-    rescue Exception =>exc 
-      CLI.die(exc, 2) 
-    end
-
 
     desc "showuids attribute value", "Replace the attribute for the uid"
     method_option :config, :type =>:string, :required =>true
-    def match(attribute, value, *attributes)
+    def find(attribute, value, *attributes)
 
-      config    = Config.new(options[:config])
-      ldap      = Connection.new(config)
-      resultset = ldap.find_by(attribute, value, attributes)
+      connection = Connection.new(Config.new(options[:config]))
+      rs         = connection.read(attribute, value, attributes)
+        
+      abort("No entry results for the match: #{attribute}=#{value}") if rs.length == 0
+      rs.each do |entry| 
 
-      resultset.each { |entry| puts entry.inspect; CLI.pp_entry(entry, attributes) }
+        entry.attribute_names.each { |attr| puts "#{attr}: #{(entry[attr].length > 1) ? entry[attr].join(',') : entry[attr][0]}" }
+      end
     rescue Exception =>exc
-      CLI.die(exc, 3) 
+      abort("ERROR: #{exc.message}")
+    end
+
+
+    desc "update UID attribute value", "Replace the attribute for the uid"
+    method_option :config, :type =>:string, :required =>true
+    def update(uid, attribute, value)
+
+      connection = Connection.new(Config.new(options[:config]))
+      dn         = connection.uid2dn(uid)
+
+      connection.update(dn, { attribute =>value }) 
+    rescue Exception =>exc 
+      abort("ERROR: #{exc.message}")
     end
   end
 end
