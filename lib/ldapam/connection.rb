@@ -7,23 +7,22 @@ module LDAPAM
   class ConnectionError < StandardError
   end
 
+  class NoResults < StandardError
+  end
+
   class Connection
 
     CONFIG_KEYS = [:uri, :base, :username, :password]
 
-
     def self.test_config(options)
 
-      CONFIG_KEYS.each do |key|
-
-        raise ConnectionError.new("Bad configuration, the key: #{key} do not exist") unless options.keys.include?(key)
-      end
+      CONFIG_KEYS.all? { |k| options.keys.include?(k)}
     end
 
 
     def initialize(options)
 
-      Connection.test_config(options)
+      raise ConnectionError.new("Bad configuration file") unless Connection.test_config(options)
 
       uri = URI.parse(options[:uri])
 
@@ -41,21 +40,44 @@ module LDAPAM
       self
     end
 
+    def create(dn, attributes)
 
-    def update(dn, attribute, value)
-
-      @connection.replace_attribute(dn, attribute, value)
+      @connection.add(:dn =>dn, :attributes =>attributes)
     end
 
+    def read(attribute, value, attributes=nil)
       
-    def find_by(attribute, value, attributes=[:dn])
-      
-      filter = Net::LDAP::Filter.eq(attribute, value)
-
-      @connection.search(
-        :filter        =>filter, 
+      result = @connection.search(
+        :filter        =>Net::LDAP::Filter.eq(attribute, value), 
         :attributes    =>attributes,
         :return_result =>true)
+
+      raise NoResults.new("No results for search: '#{attribute}=#{value}") unless result.length > 0
+
+      return result
+    end
+
+    def update(dn, attributes)
+
+      # @TODO: Esta operacion no es transaccional
+      attributes.each { |a, v| @connection.replace_attribute(dn, a, v) }
+    end
+
+    def delete(dn)
+
+      @connection.delete(:dn =>dn)
+    end
+
+    def uid2dn(uid)
+
+      result = @connection.search(
+        :filter        =>Net::LDAP::Filter.eq("uid", uid),
+        :attributes    =>[:dn],
+        :return_result =>true)
+
+      raise NoResults.new("No results for UID: #{uid}") if result.length == 0
+
+      return result[0].dn
     end
   end
 end
